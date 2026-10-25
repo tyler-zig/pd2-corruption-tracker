@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PD2 Corruption</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0a0d;
+    --panel: #15131a;
+    --panel-2: #1c1923;
+    --line: #2a2633;
+    --text: #e8e4ee;
+    --muted: #8d869b;
+    --gold: #d9a441;
+    --ember: #e5532d;
+    --corrupt: #a24bd6;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(900px 500px at 15% -10%, rgba(162,75,214,.18), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, rgba(229,83,45,.12), transparent 60%),
+      var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+    font: 15px/1.45 Inter, system-ui, sans-serif;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+
+  header { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  h1 { margin: 0; font: 700 28px Cinzel, serif; letter-spacing: .06em; color: var(--gold); }
+  h1 small { display: block; font: 500 12px Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+  h2 { font: 700 15px Cinzel, serif; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin: 0; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .chip { display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; color: var(--muted); font-size: 13px; }
+  .chip input[type=number] { width: 3.2em; background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; font: inherit; }
+  .chip input[type=range] { width: 100px; accent-color: var(--gold); }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .icon-btn { background: none; border: 0; padding: 0 2px; font-size: 18px; line-height: 1; }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .hero { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; margin-bottom: 28px; }
+  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; }
+  .now { border-color: rgba(162,75,214,.5); background: linear-gradient(160deg, rgba(162,75,214,.16), var(--panel) 55%); }
+  .eyebrow { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--corrupt); font-weight: 600; }
+  .now .zone { font: 700 26px/1.2 Cinzel, serif; margin: 6px 0 4px; }
+  .act { display: inline-block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+  .timer { font: 600 34px/1 Inter, sans-serif; font-variant-numeric: tabular-nums; margin: 14px 0 10px; }
+  .bar { height: 6px; background: var(--panel-2); border-radius: 3px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--corrupt), var(--ember)); transition: width 1s linear; }
+  .next .zone { font: 700 19px/1.25 Cinzel, serif; margin: 6px 0; }
+  .next .sub { color: var(--muted); font-size: 13px; }
+
+  .section-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin: 0 0 12px; }
+  .upcoming { list-style: none; margin: 0 0 32px; padding: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .upcoming li { display: grid; grid-template-columns: 90px 1fr auto auto; gap: 12px; align-items: center; padding: 10px 16px; border-top: 1px solid var(--line); }
+  .upcoming li:first-child { border-top: 0; }
+  .upcoming .t { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .upcoming .in { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .upcoming li.is-now { background: rgba(162,75,214,.1); }
+  @media (max-width: 560px) { .upcoming li { grid-template-columns: 70px 1fr auto; } .upcoming .in { display: none; } }
+
+  .tools { display: flex; gap: 8px; align-items: center; }
+  .search { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; color: var(--text); padding: 7px 12px; font: inherit; min-width: 200px; }
+  .toggle { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; color: var(--muted); font-size: 13px; }
+  .toggle[aria-pressed=true] { color: var(--gold); border-color: var(--gold); }
+
+  .act-group { margin: 22px 0 8px; font: 700 13px Cinzel, serif; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  .zcard { display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .zcard.watched { border-color: rgba(217,164,65,.5); }
+  .zcard.live { border-color: var(--corrupt); box-shadow: 0 0 0 1px var(--corrupt) inset; }
+  .zcard .name { flex: 1; min-width: 0; font-weight: 500; font-size: 14px; }
+  .zcard .when { display: block; color: var(--muted); font-size: 12px; font-weight: 400; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .zcard.live .when { color: var(--corrupt); font-weight: 600; }
+
+  .bell { background: none; border: 1px solid transparent; border-radius: 8px; padding: 4px 6px; font-size: 17px; filter: grayscale(1) opacity(.45); transition: filter .15s, background .15s; }
+  .bell:hover { background: var(--panel-2); filter: grayscale(.5) opacity(.8); }
+  .bell[aria-pressed=true] { filter: none; background: rgba(217,164,65,.12); border-color: rgba(217,164,65,.4); }
+
+  footer { margin-top: 40px; color: var(--muted); font-size: 12px; text-align: center; }
+  footer a { color: var(--gold); }
+  .empty { color: var(--muted); padding: 24px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>PD2 Corruption<small>Zone rotation tracker &middot; Season 10</small></h1>
+    <div class="controls">
+      <label class="chip" title="Ring this many minutes before a watched zone starts">
+        🔔 Alert <input id="minutes" type="number" min="0" max="99" value="0" inputmode="numeric"> min before
+      </label>
+      <div class="chip">
+        <button id="mute" class="icon-btn" aria-label="Toggle sound" aria-pressed="true">🔇</button>
+        <input id="volume" type="range" min="0" max="100" value="80" aria-label="Volume">
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="card now">
+      <div class="eyebrow">Corrupted now</div>
+      <div class="zone" id="nowZone">&nbsp;</div>
+      <span class="act" id="nowAct"></span>
+      <div class="timer" id="nowTimer">--:--</div>
+      <div class="bar"><i id="nowBar"></i></div>
+    </div>
+    <div class="card next">
+      <div class="eyebrow" style="color:var(--gold)">Up next</div>
+      <div class="zone" id="nextZone">&nbsp;</div>
+      <div class="sub" id="nextWhen"></div>
+      <div style="margin-top:12px"><button class="bell" id="nextBell" aria-label="Watch this zone">🔔</button></div>
+    </div>
+  </section>
+
+  <div class="section-head"><h2>Upcoming</h2></div>
+  <ul class="upcoming" id="upcoming"></ul>
+
+  <div class="section-head">
+    <h2>All zones</h2>
+    <div class="tools">
+      <input class="search" id="search" type="search" placeholder="Filter zones…" aria-label="Filter zones">
+      <button class="toggle" id="watchOnly" aria-pressed="false">★ Watched only</button>
+    </div>
+  </div>
+  <div id="all"></div>
+
+  <footer>Rotation maths and sound by <a href="https://github.com/exiledagain/past-dinosaurs">exiledagain/past-dinosaurs</a> (public domain). Restyled.</footer>
+</div>
+
+<script>
+const ZONES = ["Blood Moor and Den of Evil", "Cold Plains and the Cave", "Stony Field and Tristram", "Dark Wood and the Underground Passage", "Black Marsh and the Hole", "Tamoe Highland and the Pit", "Burial Ground and Mausoleum", "Forgotten Tower", "Outer Cloister and Barracks", "Jail, Inner Cloister, and Cathedral", "Catacombs", "Cow Level", "Rocky Waste and the Stony Tomb", "Dry Hills and the Halls of the Dead", "Far Oasis and the Maggot Lair", "Lost City, Ancient Tunnels, and Claw Viper Temple", "Canyon of the Magi and Tal Rasha's Tomb", "Lut Gholein Sewers and the Palace Cellars", "Arcane Sanctuary", "Spider Forest, Arachnid Lair, and Spider Cavern", "Great Marsh and the Swampy Pit", "Flayer Jungle and the Flayer Dungeon", "Lower Kurast and the Kurast Sewers", "Kurast Bazaar, Ruined Temple, and Disused Fane", "Upper Kurast, the Forgotten Reliquary, and Forgotten Temple", "Travincal, the Ruined Fane, and Disused Reliquary", "Durance of Hate", "Outer Steppes and the Plains of Despair", "City of the Damned and the River of Flame", "Chaos Sanctuary", "Bloody Foothills and the Frigid Highlands", "Arreat Plateau, Crystalline Passage, and Frozen River", "Glacial Trail, Drifter Cavern, and Frozen Tundra", "Ancients' Way and the Icy Cellar", "Nihlathak's Temple", "Abaddon, the Pit of Acheron, and the Infernal Pit", "Worldstone Keep and Throne of Destruction"]
+// first index of each act in ZONES
+const ACT_STARTS = [0, 12, 19, 27, 30]
+const actOf = i => ACT_STARTS.filter(s => s <= i).length
+const SLOT = 900e3, MAX_UPCOMING = 15
+
+// --- rotation (unchanged from the original) ---
+const nextPrng = (seed, mul, inc) => Number(((BigInt(seed) * BigInt(mul) + BigInt(inc)) >> 16n) & 32767n)
+const getZone = (ts = Date.now(), n = 0) => {
+  ts = ~~(ts / SLOT) * SLOT + SLOT * n
+  const seed = ~~(ts / SLOT) + ~~(ts / 86400000)
+  return { zone: ZONES[nextPrng(seed, 214013, 2531011) % ZONES.length], ts, seed }
+}
+const getNextZones = () => {
+  const ts = Date.now()
+  let k = ZONES.length
+  const first = {}, list = []
+  for (let i = 0; k > 0 || list.length < MAX_UPCOMING; ++i) {
+    const info = getZone(ts, i)
+    if (!first[info.zone]) { k--; first[info.zone] = info }
+    if (list.length < MAX_UPCOMING) list.push(info)
+  }
+  return { list, first }
+}
+
+// --- sound + alarms ---
+class SoundControl {
+  constructor (uri) { this.last = 0; this.audio = new Audio(uri) }
+  volume (n = this.audio.volume) { this.audio.volume = n; return n }
+  async play (override) {
+    const now = Date.now()
+    if (this.audio.volume <= 0) return false
+    if (!override && now - this.last < 10e3) return true
+    try {
+      this.audio.currentTime = 0
+      await this.audio.play()
+      if (!override) this.last = now
+      return true
+    } catch (e) { console.error(e) }
+    return false
+  }
+}
+
+const sound = new SoundControl('bell.wav')
+const store = {
+  get: (k, d) => { try { return localStorage.getItem(k) ?? d } catch { return d } },
+  set: (k, v) => { try { localStorage.setItem(k, v) } catch {} }
+}
+const KEY = 'alarm/s10/' // same key as the original, so existing bells carry over
+let followed = JSON.parse(store.get(KEY, '{}'))
+let leadMin = 0, zonesFirst = {}, timeouts = new Map(), fired = {}
+
+const clearAlarms = () => { timeouts.forEach(clearTimeout); timeouts = new Map() }
+const setupAlarms = () => {
+  clearAlarms()
+  const now = Date.now()
+  for (const [zone, { ts }] of Object.entries(zonesFirst)) {
+    if (followed[zone]) timeouts.set(zone, setTimeout(alert, Math.max(0, ts - now - leadMin * 60e3), zone, ts))
+  }
+}
+async function alert (zone, ts) {
+  if (!timeouts.has(zone)) return
+  timeouts.delete(zone)
+  if (fired[zone] === ts) return
+  if (await sound.play()) fired[zone] = ts
+  else if (followed[zone] && Date.now() < ts + SLOT) timeouts.set(zone, setTimeout(alert, 1000, zone, ts)) // blocked until a click; retry
+}
+const toggleFollow = zone => {
+  followed[zone] = !followed[zone]
+  store.set(KEY, JSON.stringify(followed))
+  setupAlarms()
+  syncBells()
+}
+
+// --- rendering ---
+const $ = s => document.querySelector(s)
+const fmtTime = ts => new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+const fmtDay = ts => { const d = new Date(ts); return d.toDateString() === new Date().toDateString() ? '' : d.toLocaleDateString([], { weekday: 'short' }) + ' ' }
+const fmtIn = ms => {
+  if (ms <= 0) return 'now'
+  const s = Math.ceil(ms / 1000), h = ~~(s / 3600), m = ~~(s % 3600 / 60), r = s % 60
+  return h ? `${h}h ${m}m` : m ? `${m}m ${String(r).padStart(2, '0')}s` : `${r}s`
+}
+const bellBtn = zone => `<button class="bell" data-zone="${zone.replace(/"/g, '&quot;')}" aria-pressed="${!!followed[zone]}" aria-label="Alert me for ${zone.replace(/"/g, '&quot;')}">${followed[zone] ? '🔔' : '🔕'}</button>`
+
+let slotId = -1, view = null
+const buildSlot = () => {
+  view = getNextZones()
+  zonesFirst = view.first
+  setupAlarms()
+  const [cur, nxt] = view.list
+  $('#nowZone').textContent = cur.zone
+  $('#nowAct').textContent = 'Act ' + actOf(ZONES.indexOf(cur.zone))
+  $('#nextZone').textContent = nxt.zone
+  $('#nextBell').dataset.zone = nxt.zone
+  $('#upcoming').innerHTML = view.list.map((z, i) =>
+    `<li class="${i === 0 ? 'is-now' : ''}"><span class="t">${fmtDay(z.ts)}${fmtTime(z.ts)}</span><span>${z.zone}</span><span class="in" data-ts="${z.ts}"></span>${bellBtn(z.zone)}</li>`).join('')
+  renderAll()
+  syncBells()
+}
+const renderAll = () => {
+  const q = $('#search').value.trim().toLowerCase()
+  const only = $('#watchOnly').getAttribute('aria-pressed') === 'true'
+  let html = '', lastAct = 0
+  ZONES.forEach((zone, i) => {
+    if (q && !zone.toLowerCase().includes(q)) return
+    if (only && !followed[zone]) return
+    const a = actOf(i)
+    if (a !== lastAct) { if (lastAct) html += '</div>'; html += `<div class="act-group">Act ${a}</div><div class="grid">`; lastAct = a }
+    const ts = zonesFirst[zone].ts
+    html += `<div class="zcard${followed[zone] ? ' watched' : ''}${ts <= Date.now() ? ' live' : ''}" data-zone="${zone.replace(/"/g, '&quot;')}"><span class="name">${zone}<span class="when" data-ts="${ts}"></span></span>${bellBtn(zone)}</div>`
+  })
+  $('#all').innerHTML = lastAct ? html + '</div>' : '<div class="empty">No zones match.</div>'
+  tick()
+}
+const syncBells = () => {
+  document.querySelectorAll('.bell[data-zone]').forEach(b => {
+    const on = !!followed[b.dataset.zone]
+    b.setAttribute('aria-pressed', on)
+    b.textContent = on ? '🔔' : '🔕'
+    b.closest('.zcard')?.classList.toggle('watched', on)
+  })
+  if ($('#watchOnly').getAttribute('aria-pressed') === 'true') renderAll()
+}
+const tick = () => {
+  const now = Date.now()
+  const id = getZone(now).seed
+  if (id !== slotId) { slotId = id; buildSlot(); return }
+  const start = view.list[0].ts, end = start + SLOT
+  $('#nowTimer').textContent = fmtIn(end - now)
+  $('#nowBar').style.width = ((now - start) / SLOT * 100) + '%'
+  $('#nextWhen').textContent = `${fmtTime(end)} · in ${fmtIn(end - now)}`
+  document.querySelectorAll('.in[data-ts]').forEach(e => { e.textContent = fmtIn(+e.dataset.ts - now) })
+  document.querySelectorAll('.when[data-ts]').forEach(e => {
+    const ts = +e.dataset.ts
+    e.textContent = ts <= now ? 'Active now' : `${fmtDay(ts)}${fmtTime(ts)} · in ${fmtIn(ts - now)}`
+  })
+}
+
+// --- wiring ---
+document.addEventListener('click', e => {
+  const b = e.target.closest('.bell[data-zone]')
+  if (b) toggleFollow(b.dataset.zone)
+})
+$('#search').oninput = renderAll
+$('#watchOnly').onclick = e => { const b = e.currentTarget; b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true'); renderAll() }
+
+let muted = true, lastVolume = +store.get('volume', 80)
+const volume = $('#volume'), mute = $('#mute')
+const applyVolume = () => {
+  volume.value = muted ? 0 : lastVolume
+  sound.volume(volume.value / 100)
+  mute.textContent = muted ? '🔇' : '🔊'
+  mute.setAttribute('aria-pressed', muted)
+}
+applyVolume() // starts muted: browsers block audio until the first click
+volume.oninput = () => {
+  lastVolume = +volume.value
+  muted = lastVolume === 0
+  store.set('volume', lastVolume)
+  applyVolume()
+}
+volume.onchange = () => { if (!muted) sound.play(true) }
+mute.onclick = () => { muted = !muted; if (!muted && !lastVolume) lastVolume = 80; applyVolume(); setupAlarms(); if (!muted) sound.play(true) }
+
+const minutes = $('#minutes')
+minutes.value = leadMin = +store.get('countdown', 0) || 0
+minutes.onchange = () => {
+  leadMin = Math.max(0, Math.min(99, +minutes.value || 0))
+  minutes.value = leadMin
+  store.set('countdown', leadMin)
+  setupAlarms()
+}
+
+tick()
+setInterval(tick, 1000)
+</script>
+</body>
+</html>
